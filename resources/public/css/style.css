@@ -1,0 +1,26 @@
+.game-board {
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.game-cell {
+  /* padding: 1px; */
+  margin: 0;
+  cursor: pointer;
+}
+
+.game-cell--visible {
+  background: white;
+  /* border: 1px dotted brown; */
+  color: brown;
+}
+
+.game-cell--hidden {
+  background: brown;
+  /* border: 1px solid white; */
+  color: white;
+}
+
+.game-cell--hidden:hover {
+  background: green;
+}
