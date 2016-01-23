@@ -17,6 +17,22 @@
         count-of-non-zero-cells (reduce + (vals cell-configuration))]
     (- count-of-all-cells count-of-non-zero-cells)))
 
+(defn- calculate-surrounding-power [game-variant cells index]
+  (->> index
+       (b/get-neighbors-of-index game-variant cells)
+       (reduce
+         #(+ %1 (:power %2))
+         0)))
+
+(defn- update-surrounding-power-in-cells [game-variant cells]
+  (let [cells-vector (vec cells)]
+    (map-indexed
+      (fn [index cell]
+        (assoc
+          cell :surrounding-power
+          (calculate-surrounding-power game-variant cells-vector index)))
+      cells-vector)))
+
 (defn- init-cells [game-variant]
   (let [cell-configuration (:cell-configuration game-variant)
         zero-cells-count (count-zero-cells game-variant)
@@ -25,7 +41,9 @@
          (map (fn [[level count]] (repeat count level)))
          flatten
          shuffle
-         (map c/init))))
+         (map c/init)
+         (update-surrounding-power-in-cells game-variant)
+         vec)))
 
 (defn init [game-variant-id]
   (if-let [game-variant (game-variant-id game-variants)]
