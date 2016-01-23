@@ -10,17 +10,33 @@
 
 (defonce app-state (atom {:game (game/init :16x30)}))
 
+(defn classnames [classes-map]
+  (reduce
+    (fn [classes [class value]]
+      (if value
+        (str classes " " class)
+        classes))
+    ""
+    classes-map))
+
 (defn render-cell [[index cell]]
   ^{:key index} [:td.game-cell
-                 {:class (str (if (:visible cell)
-                                "game-cell--visible"
-                                "game-cell--hidden"))
+                 {:class (classnames {"game-cell--visible" (:visible cell)
+                                      "game-cell--hidden" (not (:visible cell))
+                                      (str "game-cell--surrounding-" (:surrounding-power cell)) true})
                   :on-click #(swap!
                                app-state
                                assoc :game
                                (game/make-move (:game @app-state) index))}
                  (if (:visible cell)
-                   (:power cell)
+                   (if (and
+                         (zero? (:power cell))
+                         (zero? (:surrounding-power cell)))
+                     ""
+                     [:span
+                      (str "s" (:surrounding-power cell))
+                      [:br]
+                      (str "p" (:power cell))])
                    "x")])
 
 (defn group-in-rows [nOfColumns cells]
