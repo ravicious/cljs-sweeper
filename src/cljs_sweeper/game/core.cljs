@@ -19,7 +19,7 @@
 
 (defn- calculate-surrounding-power [game-variant cells index]
   (->> index
-       (b/get-neighbors-of-index game-variant cells)
+       (b/get-neighbor-cells-of-index game-variant cells)
        (reduce
          #(+ %1 (:power %2))
          0)))
@@ -54,15 +54,38 @@
               (init-cells game-variant))}
     (throw "Invalid game variant ID")))
 
+(defn reveal-cell [game-state cell-index]
+  (update-in game-state [:board] b/reveal-cell cell-index))
+
+(defn reveal-safe-cells [game-state cell-index]
+  (let [safe-neighbor-indexes (b/get-neighbor-indexes-of-index
+                                (:board game-state)
+                                (-> game-state :board :cells)
+                                (comp zero? :power)
+                                cell-index)]
+    (reduce
+      (fn [game-state cell-index]
+        (reveal-cell game-state cell-index))
+      game-state
+      (conj safe-neighbor-indexes cell-index))))
+
 (defn make-move [game-state cell-index]
-  (let [cell (get-in game-state [:board :cells cell-index 1])
+  (let [cell (get-in game-state [:board :cells cell-index])
         player (:player game-state)]
     (if-not (:visible cell)
-      (if (>= (:power player) (:power cell))
+      (cond
+        (and
+          (zero? (:power cell))
+          (zero? (:surrounding-power cell)))
         (-> game-state
-            (update-in [:board :cells cell-index 1] assoc :visible true)
+            (reveal-safe-cells cell-index))
+        (>= (:power player) (:power cell))
+        (-> game-state
+            (reveal-cell cell-index)
             (update-in [:player :exp] + (:power cell)))
+        (< (:power player) (:power cell))
         (-> game-state
-            (update-in [:board :cells cell-index 1] assoc :visible true)
-            (update-in [:player :health] - (:power cell))))
+            (reveal-cell cell-index)
+            (update-in [:player :health] - (:power cell)))
+        :else game-state)
       game-state)))

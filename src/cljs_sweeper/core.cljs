@@ -50,6 +50,7 @@
 
 (defn render-board [board]
   (->> (:cells board)
+       (map-indexed vector)
        (map render-cell)
        (group-in-rows (:columns board))
        (map render-row)

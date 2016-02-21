@@ -4,7 +4,7 @@
   {:pre [(< 1 rows), (< 1 columns), (= (count cells) (* rows columns))]}
   {:rows rows
    :columns columns
-   :cells (vec (map-indexed vector cells))})
+   :cells (vec cells)})
 
 (def ^:private min-coordinate 0)
 
@@ -35,13 +35,21 @@
    ]
   )
 
-(defn get-neighbors-of-index [board-bounds cells index]
-  (let [coordinates (calculate-coordinates board-bounds index)
-        neighbor-coordinates (get-neighbor-coordinates coordinates)]
-    (->> neighbor-coordinates
-         (map (partial calculate-index board-bounds))
-         (remove nil?)
-         (map (partial get cells)))))
+(defn get-neighbor-indexes-of-index
+  ([board-bounds index]
+   (let [coordinates (calculate-coordinates board-bounds index)
+         neighbor-coordinates (get-neighbor-coordinates coordinates)]
+     (->> neighbor-coordinates
+          (map (partial calculate-index board-bounds))
+          (remove nil?))))
+  ([board-bounds cells pred index]
+   (filter #(pred (get cells %)) (get-neighbor-indexes-of-index board-bounds index))))
+
+(defn get-neighbor-cells-of-index
+  ([board-bounds cells index]
+   (map (partial get cells) (get-neighbor-indexes-of-index board-bounds index)))
+  ([board-bounds cells pred index]
+   (filter pred (get-neighbor-cells-of-index board-bounds cells index))))
 
 (defn reveal-cell [board cell-index]
-  (update-in board [:cells cell-index 1] assoc :visible true))
+  (update-in board [:cells cell-index] assoc :visible true))
