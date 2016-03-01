@@ -54,19 +54,11 @@
               (init-cells game-variant))}
     (throw "Invalid game variant ID")))
 
-(defn- profile-function [profile-name function & args]
-  (do
-    (.profile js/console profile-name)
-    (let [result (apply function args)]
-      (do
-        (.profileEnd js/console)
-        result))))
-
 (defn reveal-cell [game-state cell-index]
   (update-in game-state [:board] b/reveal-cell cell-index))
 
 (defn reveal-safe-cells [game-state cell-index]
-  (let [indexes-to-reveal (profile-function "find-safe-indexes-to-reveal" f/find-safe-indexes-to-reveal game-state cell-index)]
+  (let [indexes-to-reveal (f/find-safe-indexes-to-reveal game-state cell-index)]
     (reduce
       (fn [game-state index-to-reveal]
         (reveal-cell game-state index-to-reveal))
