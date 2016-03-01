@@ -37,6 +37,7 @@
 
 (defn get-neighbor-indexes-of-index
   ([board-bounds index]
+   {:pre [(integer? index) (>= index 0)]}
    (let [coordinates (calculate-coordinates board-bounds index)
          neighbor-coordinates (get-neighbor-coordinates coordinates)]
      (->> neighbor-coordinates

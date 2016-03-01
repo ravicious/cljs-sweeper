@@ -37,7 +37,8 @@
                            :main cljs-sweeper.core
                            :optimizations :advanced
                            :pretty-print false
-                           :parallel-build true}}]}
+                           :parallel-build true
+                           :elide-asserts true}}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
