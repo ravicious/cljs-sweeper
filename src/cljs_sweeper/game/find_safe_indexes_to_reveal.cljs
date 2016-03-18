@@ -1,59 +1,70 @@
 (ns cljs-sweeper.game.find-safe-indexes-to-reveal
   (:require [cljs-sweeper.game.board :as b]))
 
-(defn- build-neighbor-reducer-for-game-state [game-state indexes-visited]
-  (fn [[acc-to-visit acc-to-reveal] index]
-    (let [cell (get-in game-state [:board :cells index])]
-      ; visit neighbor if it's surrounding power equals zero
-      [(if (and
-             (zero? (:surrounding-power cell))
-             (not (contains? indexes-visited index)))
-         (conj acc-to-visit index)
-         acc-to-visit)
-       ; reveal neighbor if it's power equals zero
-       (if (zero? (:power cell))
-         (conj acc-to-reveal index)
-         acc-to-reveal)])))
+(defn- initialize-indexes-state [current-index]
+  {:to-visit #{current-index}
+   :visited #{}
+   :to-reveal #{}})
 
-(defn- group-neighbor-indexes
-  "Determines which neighbors should be visited and which should be revealed"
-  [game-state indexes-to-visit indexes-visited indexes-to-reveal neighbor-indexes]
-  (let [neighbor-reducer (build-neighbor-reducer-for-game-state game-state indexes-visited)]
-    (reduce
-      neighbor-reducer
-      [indexes-to-visit indexes-to-reveal]
-      neighbor-indexes)))
+(defn- scan-neighbors
+  "Determines which neighbors should be visited and which should be revealed."
+  [game-state index-state neighbor-indexes]
+  (reduce
+    (fn [index-state index]
+      (let [cell (get-in game-state [:board :cells index])]
+        (as-> index-state index-state
+            ; Visit neighbor if it's surrounding power equals zero and it hasn't been visited.
+            (if (and
+                   (zero? (:surrounding-power cell))
+                   (not (contains? (:visited index-state) index)))
+               (update-in index-state [:to-visit] conj index)
+               index-state)
+            ; Reveal neighbor if it's power equals zero.
+            (if (zero? (:power cell))
+               (update-in index-state [:to-reveal] conj index)
+               index-state))))
+    index-state
+    neighbor-indexes))
 
-(defn find-safe-indexes-to-reveal
-  ([game-state
-    indexes-to-visit
-    indexes-visited
-    indexes-to-reveal]
-   (let [current-index (first indexes-to-visit)
-         next-indexes-to-visit (rest indexes-to-visit)]
-     (if-not current-index
-       indexes-to-reveal ; end evaluation and return the set of indexes to reveal
-       (let [current-cell (get-in game-state [:board :cells current-index])
-             ; add current-index to the list of visited indexes
-             final-indexes-visited (conj indexes-visited current-index)
-             ; determine if the current-cell should be revealed
-             next-indexes-to-reveal (if (zero? (:power current-cell))
-                              (conj indexes-to-reveal current-index)
-                              indexes-to-reveal)
-             neighbor-indexes (b/get-neighbor-indexes-of-index
-                                (:board game-state)
-                                current-index)
-             [final-indexes-to-visit
-              final-indexes-to-reveal] (group-neighbor-indexes
-                                         game-state
-                                         next-indexes-to-visit
-                                         final-indexes-visited
-                                         next-indexes-to-reveal
-                                         neighbor-indexes)]
-         (recur game-state
-                final-indexes-to-visit
-                final-indexes-visited
-                final-indexes-to-reveal)))))
-  ([game-state index-to-process]
-   {:pre [(not (nil? index-to-process))]}
-   (find-safe-indexes-to-reveal game-state [index-to-process] #{} #{})))
+(defn- scan-current-index-and-neighbors
+  "Decides where to put current-index and looks through its neighbors to find other cells to scan."
+  [game-state index-state current-index]
+  (let [current-cell (get-in game-state [:board :cells current-index])
+        neighbor-indexes (b/get-neighbor-indexes-of-index
+                           (:board game-state)
+                           current-index)]
+    (as-> index-state index-state
+      ; Add current-index to the list of visited indexes.
+      (update-in index-state [:visited] conj current-index)
+      ; Determine if the current-cell should be revealed.
+      (if (zero? (:power current-cell))
+        (update-in index-state [:to-reveal] conj current-index)
+        index-state)
+      (scan-neighbors
+        game-state
+        index-state
+        neighbor-indexes))))
+
+; The algorith is as follows:
+; 1. Remove the first index (later called current-index) from the set of indexes to visit.
+; 2. If current-index is nil, that means there are no indexes to check. Return the set of indexes to reveal.
+; 3. If current-index is present, add it to the set of visited indexes.
+; 4. If current-index power is equal to zero, add it to the set of indexes to reveal.
+; 5. For each neighbor of current-index, do the following:
+;   a. If the surrounding power of the neighbor is zero and it hasn't been visited, add it
+;      to the set of indexes to visit.
+;   b. If the power of the neighbor is zero, add it to the set of indexes to reveal.
+; 6. Go to 1.
+
+(defn- find-indexes-to-reveal [game-state index-state]
+  (let [current-index (first (:to-visit index-state))
+        ; Remove current-index from the set of indexes to visit.
+        index-state (update-in index-state [:to-visit] (comp set rest))]
+    (if-not current-index
+      (:to-reveal index-state) ; End evaluation and return the set of indexes to reveal.
+      (let [index-state (scan-current-index-and-neighbors game-state index-state current-index)]
+        (recur game-state index-state)))))
+
+(defn find-safe-indexes-to-reveal [game-state index-to-process]
+  {:pre [(not (nil? index-to-process))]}
+  (find-indexes-to-reveal game-state (initialize-indexes-state index-to-process)))
