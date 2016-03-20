@@ -8,7 +8,8 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:game (game/init :16x30)}))
+(defonce seed (rand-int (.-MAX_SAFE_INTEGER js/Number)))
+(defonce app-state (atom {:game (game/init :16x30 seed)}))
 
 (defn classnames [classes-map]
   (reduce
@@ -56,14 +57,17 @@
        (map render-row)
        render-table))
 
-(defn render-player [player]
+(defn render-player [{:keys [player seed]}]
   [:ul
    [:li (str "Level: " (:power player))]
    [:li (str "Exp: " (:exp player))]
-   [:li (str "Health: " (:health player))]])
+   [:li (str "Health: " (:health player))]
+   [:li (str "Seed: " seed)]])
 
 (defn hello-world []
-  [:div (render-board (get-in @app-state [:game :board] @app-state)) (render-player (get-in @app-state [:game :player]))])
+  [:div
+   (render-board (get-in @app-state [:game :board] @app-state))
+   (render-player (:game @app-state))])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))

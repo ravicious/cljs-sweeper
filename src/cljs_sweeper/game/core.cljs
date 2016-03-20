@@ -1,8 +1,10 @@
 (ns cljs-sweeper.game.core
-  (:require [cljs-sweeper.game.board :as b]
+  (:require [cljsjs.chance]
+            [cljs-sweeper.game.board :as b]
             [cljs-sweeper.game.player :as p]
             [cljs-sweeper.game.cell :as c]
-            [cljs-sweeper.game.find-safe-indexes-to-reveal :as f]))
+            [cljs-sweeper.game.find-safe-indexes-to-reveal :as f]
+            [cljs-sweeper.utils :as utils]))
 
 (def game-variants {:16x30 {:rows 16
                             :columns 30
@@ -33,25 +35,26 @@
           (calculate-surrounding-power game-variant cells-vector index)))
       cells-vector)))
 
-(defn- init-cells [game-variant]
+(defn- init-cells [game-variant seed]
   (let [cell-configuration (:cell-configuration game-variant)
         zero-cells-count (count-zero-cells game-variant)
         full-cell-configuration (assoc cell-configuration 0 zero-cells-count)]
     (->> full-cell-configuration
          (map (fn [[level count]] (repeat count level)))
          flatten
-         shuffle
+         (utils/shuffle seed)
          (map c/init)
          (update-surrounding-power-in-cells game-variant)
          vec)))
 
-(defn init [game-variant-id]
+(defn init [game-variant-id seed]
   (if-let [game-variant (game-variant-id game-variants)]
     {:player (p/init)
      :board (b/init
               (:rows game-variant)
               (:columns game-variant)
-              (init-cells game-variant))}
+              (init-cells game-variant seed))
+     :seed seed}
     (throw "Invalid game variant ID")))
 
 (defn reveal-cell [game-state cell-index]
