@@ -11,6 +11,11 @@
 (defonce seed (rand-int (.-MAX_SAFE_INTEGER js/Number)))
 (defonce app-state (atom {:game (game/init :16x30 seed)}))
 
+(defn reset-game [seed]
+  (reset! app-state {:game (game/init :16x30 seed)}))
+
+(set! (.-resetGame js/window) reset-game)
+
 (defn classnames [classes-map]
   (reduce
     (fn [classes [class value]]
