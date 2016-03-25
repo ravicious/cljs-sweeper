@@ -57,6 +57,15 @@
      :seed seed}
     (throw "Invalid game variant ID")))
 
+(defn cell [game-state index]
+  (get-in game-state [:board :cells index]))
+
+(defn cells [game-state]
+  (get-in game-state [:board :cells]))
+
+(defn columns [game-state]
+  (get-in game-state [:board :columns]))
+
 (defn reveal-cell [game-state cell-index]
   (update-in game-state [:board] b/reveal-cell cell-index))
 
