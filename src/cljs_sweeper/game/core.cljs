@@ -6,13 +6,29 @@
             [cljs-sweeper.game.find-safe-indexes-to-reveal :as f]
             [cljs-sweeper.utils :as utils]))
 
-(def game-variants {:16x30 {:rows 16
-                            :columns 30
-                            :cell-configuration {1 33
-                                                 2 27
-                                                 3 20
-                                                 4 13
-                                                 5 6}}})
+(defn cell [game-state index]
+  (get-in game-state [:board :cells index]))
+
+(defn cells [game-state]
+  (get-in game-state [:board :cells]))
+
+(defn columns [game-state]
+  (get-in game-state [:board :columns]))
+
+(defn rows [game-state]
+  (get-in game-state [:board :rows]))
+
+(defn number-of-cells [game-state]
+  (* (columns game-state) (rows game-state)))
+
+(def ^:private game-variants
+  {:16x30 {:rows 16
+           :columns 30
+           :cell-configuration {1 33
+                                2 27
+                                3 20
+                                4 13
+                                5 6}}})
 
 (defn- count-zero-cells [{:keys [cell-configuration rows columns]}]
   (let [count-of-all-cells (* rows columns)
@@ -56,15 +72,6 @@
               (init-cells game-variant seed))
      :seed seed}
     (throw "Invalid game variant ID")))
-
-(defn cell [game-state index]
-  (get-in game-state [:board :cells index]))
-
-(defn cells [game-state]
-  (get-in game-state [:board :cells]))
-
-(defn columns [game-state]
-  (get-in game-state [:board :columns]))
 
 (defn reveal-cell [game-state cell-index]
   (update-in game-state [:board] b/reveal-cell cell-index))
