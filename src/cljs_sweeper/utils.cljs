@@ -15,3 +15,14 @@
         a (to-array coll)]
     (garray/shuffle a #(. chance (floating (clj->js {:min 0 :max 1}))))
     (vec a)))
+
+(defn get-next
+  "Returns the next item after x in coll. If x is the last item, returns the first item of coll."
+  [coll x]
+  {:pre [(contains? (set coll) x)]}
+  (->> coll cycle (drop-while (partial not= x)) second))
+
+(defn get-prev
+  "Returns the previous item before x in coll. If x is the first item, returns the last item of coll."
+  [coll x]
+  (get-next (rseq coll) x))

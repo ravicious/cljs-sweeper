@@ -17,3 +17,12 @@
 (register-handler
   :cell-click
   cell-click)
+
+(defn- cycle-power-mark [db [_ direction index]]
+  (let [powers (get-in db [:game :powers])]
+    (update-in db [:cell-ui-state index]
+               ui-state/cycle-power-mark powers direction)))
+
+(register-handler
+  :cycle-power-mark
+  cycle-power-mark)

@@ -89,14 +89,13 @@ table {
 
 .game-cell--hidden {
   background: lightgrey;
-  color: white;
+  color: fuchsia;
   border: 1px inset white;
   cursor: pointer;
 }
 
 .game-cell--hidden:hover {
   background: ghostwhite;
-  color: grey;
 }
 
 .game-cell--surrounding-0 {

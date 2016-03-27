@@ -63,6 +63,10 @@
          (update-surrounding-power-in-cells game-variant)
          vec)))
 
+(def ^:private powers
+  "Given a game-variant, returns vector with non-zero powers of given game variant."
+  (comp vec sort keys :cell-configuration))
+
 (defn init [game-variant-id seed]
   (if-let [game-variant (game-variant-id game-variants)]
     {:player (p/init)
@@ -70,6 +74,7 @@
               (:rows game-variant)
               (:columns game-variant)
               (init-cells game-variant seed))
+     :powers (powers game-variant)
      :seed seed}
     (throw "Invalid game variant ID")))
 

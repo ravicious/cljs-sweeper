@@ -5,6 +5,18 @@
 (defn group-in-rows [n-of-columns cells]
   (map-indexed vector (partition n-of-columns cells)))
 
+(defn- key-down-handler [index char-code]
+  (case char-code
+    65 ; A pressed
+    (dispatch [:cycle-power-mark :left index])
+    68 ; D pressed
+    (dispatch [:cycle-power-mark :right index])
+    37 ; <- pressed
+    (dispatch [:cycle-power-mark :left index])
+    39 ; -> pressed
+    (dispatch [:cycle-power-mark :right index])
+    nil))
+
 (defn- render-cell-component [index]
   (let [cell-and-ui-state (subscribe [:cell-with-ui-state index])]
     (fn []
@@ -23,8 +35,11 @@
                     (and (:visible cell) (not (zero? (:power cell))))
                     (str "game-cell--monster-" (name displayed-property))
                     (and (:visible cell) (not (zero? (:power cell))))})
-          :on-click #(dispatch [:cell-click index])}
-         (when (:visible cell)
+          :on-click #(dispatch [:cell-click index])
+          :on-key-down #(key-down-handler index (.-which %))
+          :on-mouse-over #(.focus (.-target %))
+          :tab-index 1}
+         (if (:visible cell)
            (cond
              (and
                (zero? (:power cell))
@@ -33,7 +48,8 @@
              (zero? (:power cell))
              (:surrounding-power cell)
              (not (zero? (:power cell)))
-             (displayed-property cell)))]))))
+             (displayed-property cell))
+           (:power-mark ui-state))]))))
 
 (defn- render-cell [index]
   ^{:key index} [render-cell-component index])
