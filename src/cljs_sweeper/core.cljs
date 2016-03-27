@@ -10,7 +10,7 @@
 
 (enable-console-print!)
 
-(re-frame/dispatch [:initialize-state])
+(re-frame/dispatch [:initialize-game])
 
 (set!
   (.-startGame js/window)

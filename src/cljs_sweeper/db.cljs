@@ -10,7 +10,7 @@
      :cell-ui-state cells-state}))
 
 (register-handler
-  :initialize-state
+  :initialize-game
   (fn [db _]
     (if (seq db)
       db
