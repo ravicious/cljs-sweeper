@@ -5,32 +5,38 @@
 (defn group-in-rows [n-of-columns cells]
   (map-indexed vector (partition n-of-columns cells)))
 
-(defn- render-cell [[index cell ui-state]]
-  (let [displayed-property (:displayed-property ui-state)]
-    ^{:key index} [:td.game-cell
-                   {:class (utils/classnames
-                             ; Classes with simple conditions.
-                             {"game-cell--visible" (:visible cell)
-                              "game-cell--hidden" (not (:visible cell))
-                              (str "game-cell--surrounding-" (:surrounding-power cell)) (:visible cell)
-                              ; More complex classes.
-                              "game-cell--zero-power"
-                              (and (:visible cell) (zero? (:power cell)))
-                              "game-cell--monster"
-                              (and (:visible cell) (not (zero? (:power cell))))
-                              (str "game-cell--monster-" (name displayed-property))
-                              (and (:visible cell) (not (zero? (:power cell))))})
-                    :on-click #(dispatch [:cell-click index])}
-                   (when (:visible cell)
-                     (cond
-                       (and
-                         (zero? (:power cell))
-                         (zero? (:surrounding-power cell)))
-                       ""
-                       (zero? (:power cell))
-                       (:surrounding-power cell)
-                       (not (zero? (:power cell)))
-                       (displayed-property cell)))]))
+(defn- render-cell-component [index]
+  (let [cell-and-ui-state (subscribe [:cell-with-ui-state index])]
+    (fn []
+      (let [[cell ui-state] @cell-and-ui-state
+            displayed-property (:displayed-property ui-state)]
+        [:td.game-cell
+         {:class (utils/classnames
+                   ; Classes with simple conditions.
+                   {"game-cell--visible" (:visible cell)
+                    "game-cell--hidden" (not (:visible cell))
+                    (str "game-cell--surrounding-" (:surrounding-power cell)) (:visible cell)
+                    ; More complex classes.
+                    "game-cell--zero-power"
+                    (and (:visible cell) (zero? (:power cell)))
+                    "game-cell--monster"
+                    (and (:visible cell) (not (zero? (:power cell))))
+                    (str "game-cell--monster-" (name displayed-property))
+                    (and (:visible cell) (not (zero? (:power cell))))})
+          :on-click #(dispatch [:cell-click index])}
+         (when (:visible cell)
+           (cond
+             (and
+               (zero? (:power cell))
+               (zero? (:surrounding-power cell)))
+             ""
+             (zero? (:power cell))
+             (:surrounding-power cell)
+             (not (zero? (:power cell)))
+             (displayed-property cell)))]))))
+
+(defn- render-cell [index]
+  ^{:key index} [render-cell-component index])
 
 (defn- render-row [[index cells]]
   ^{:key index} [:tr cells])
@@ -39,12 +45,12 @@
   [:table.game-board rows])
 
 (defn render-board []
-  (let [indexed-cells-with-ui-state (subscribe [:indexed-cells-with-ui-state])
-        columns (subscribe [:columns])]
+  (let [columns (subscribe [:columns])
+        number-of-cells (subscribe [:number-of-cells])]
     (fn render-board []
       [:div
-       (->> @indexed-cells-with-ui-state
-            (map render-cell)
+       (->> (range @number-of-cells)
+            (mapv render-cell)
             (group-in-rows @columns)
             (map render-row)
             render-table)])))

@@ -3,17 +3,14 @@
             [cljs-sweeper.game.core :as game])
   (:require-macros [reagent.ratom :refer [reaction]]))
 
-(defn- indexed-cells-with-ui-state [db, _]
-  (let [game-state (reaction (:game @db))
-        cell-ui-state (reaction (:cell-ui-state @db))
-        cells (reaction (game/cells @game-state))
-        number-of-cells (reaction (game/number-of-cells @game-state))
-        indexes (reaction (range @number-of-cells))]
-    (reaction (map vector @indexes @cells @cell-ui-state))))
+(defn- cell-with-ui-state [db, [_, i]]
+  (let [cell (reaction (game/cell (:game @db) i))
+        ui-state (reaction (get-in @db [:cell-ui-state i]))]
+    (reaction [@cell @ui-state])))
 
 (register-sub
-  :indexed-cells-with-ui-state
-  indexed-cells-with-ui-state)
+  :cell-with-ui-state
+  cell-with-ui-state)
 
 (defn- game-info [db, _]
   (let [player (reaction (get-in @db [:game :player]))
@@ -30,3 +27,10 @@
 (register-sub
   :columns
   columns)
+
+(defn- number-of-cells [db, _]
+  (reaction (game/number-of-cells (:game @db))))
+
+(register-sub
+  :number-of-cells
+  number-of-cells)
