@@ -1,0 +1,103 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+/* Sweeper CSS */
+
+
+.game-board {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.game-cell {
+  box-sizing: border-box;
+  vertical-align: middle;
+  margin: 0;
+  width: 28px;
+  height: 28px;
+  text-align: center;
+}
+
+.game-cell--zero-power, .game-cell--monster {
+  background: white;
+  border: 1px solid darkgrey;
+}
+
+.game-cell--zero-power {
+  color: forestgreen;
+}
+
+.game-cell--monster {
+  background-color: blanchedalmond;
+  cursor: pointer;
+}
+
+.game-cell--monster-power {
+  color: red;
+}
+
+.game-cell--monster-surrounding-power {
+  color: forestgreen;
+}
+
+.game-cell--hidden {
+  background: lightgrey;
+  color: fuchsia;
+  border: 1px inset white;
+  cursor: pointer;
+}
+
+.game-cell--hidden:hover {
+  background: ghostwhite;
+}
+
+.game-cell--surrounding-0 {
+  border: 1px inset whitesmoke;
+}
