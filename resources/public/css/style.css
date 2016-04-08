@@ -89,7 +89,7 @@ table {
 
 .game-cell--hidden {
   background: lightgrey;
-  color: fuchsia;
+  color: darkblue;
   border: 1px inset white;
   cursor: pointer;
 }
