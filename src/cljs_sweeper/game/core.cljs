@@ -93,19 +93,17 @@
   (let [cell (get-in game-state [:board :cells cell-index])
         player (:player game-state)]
     (if-not (:visible cell)
-      (cond
-        (and
-          (zero? (:power cell))
-          (zero? (:surrounding-power cell)))
-        (-> game-state
-            (reveal-safe-cells cell-index))
-        (>= (:power player) (:power cell))
-        (-> game-state
-            (reveal-cell cell-index)
-            (update-in [:player :exp] + (:power cell)))
-        (< (:power player) (:power cell))
-        (-> game-state
-            (reveal-cell cell-index)
-            (update-in [:player :health] - (:power cell)))
-        :else game-state)
+      (-> game-state
+          ; This stuff happens on each move.
+          (reveal-cell cell-index)
+          ; And this stuff happens only under certain conditions.
+          (cond->
+            (zero? (:surrounding-power cell))
+            (reveal-safe-cells cell-index)
+
+            (>= (:power player) (:power cell))
+            (update-in [:player :exp] + (:power cell))
+
+            (< (:power player) (:power cell))
+            (update-in [:player :health] - (:power cell))))
       game-state)))
