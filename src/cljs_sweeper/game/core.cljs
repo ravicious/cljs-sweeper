@@ -75,7 +75,8 @@
               (:columns game-variant)
               (init-cells game-variant seed))
      :powers (powers game-variant)
-     :seed seed}
+     :seed seed
+     :game-over false}
     (throw "Invalid game variant ID")))
 
 (defn reveal-cell [game-state cell-index]
@@ -92,7 +93,7 @@
 (defn make-move [game-state cell-index]
   (let [cell (get-in game-state [:board :cells cell-index])
         player (:player game-state)]
-    (if-not (:visible cell)
+    (if-not (or (:game-over game-state) (:visible cell))
       (-> game-state
           ; This stuff happens on each move.
           (reveal-cell cell-index)
@@ -106,4 +107,7 @@
 
             (< (:power player) (:power cell))
             (update-in [:player :health] - (:power cell))))
+
+            (<= (:health player) 0)
+            (assoc :game-over true)))
       game-state)))
