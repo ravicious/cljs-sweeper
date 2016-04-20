@@ -105,8 +105,10 @@
             (>= (:power player) (:power cell))
             (update-in [:player :exp] + (:power cell))
 
+            ; Decrement player health if they hit a monster stronger than them,
+            ; but make sure the health doesn't drop below 0.
             (< (:power player) (:power cell))
-            (update-in [:player :health] - (:power cell))))
+            (update-in [:player :health] #(max 0 (- % (:power cell))))
 
             (<= (:health player) 0)
             (assoc :game-over true)))
