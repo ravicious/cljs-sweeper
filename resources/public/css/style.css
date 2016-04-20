@@ -53,15 +53,15 @@ table {
 
 .game-board {
   font-family: monospace;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .game-cell {
   box-sizing: border-box;
   vertical-align: middle;
   margin: 0;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   text-align: center;
 }
 
