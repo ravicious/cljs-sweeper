@@ -18,6 +18,9 @@
 (defn rows [game-state]
   (get-in game-state [:board :rows]))
 
+(defn player [game-state]
+  (:player game-state))
+
 (defn number-of-cells [game-state]
   (* (columns game-state) (rows game-state)))
 
@@ -28,7 +31,11 @@
                                 2 27
                                 3 20
                                 4 13
-                                5 6}}})
+                                5 6}
+           :exp-progression {2 10
+                             3 50
+                             4 167
+                             5 271}}})
 
 (defn- count-zero-cells [{:keys [cell-configuration rows columns]}]
   (let [count-of-all-cells (* rows columns)
@@ -76,7 +83,8 @@
               (init-cells game-variant seed))
      :powers (powers game-variant)
      :seed seed
-     :game-over false}
+     :game-over false
+     :exp-progression (:exp-progression game-variant)}
     (throw "Invalid game variant ID")))
 
 (defn reveal-cell [game-state cell-index]
@@ -90,26 +98,17 @@
       game-state
       indexes-to-reveal)))
 
-(defn make-move [game-state cell-index]
-  (let [cell (get-in game-state [:board :cells cell-index])
-        player (:player game-state)]
-    (if-not (or (:game-over game-state) (:visible cell))
-      (-> game-state
-          ; This stuff happens on each move.
-          (reveal-cell cell-index)
-          ; And this stuff happens only under certain conditions.
-          (cond->
-            (zero? (:surrounding-power cell))
-            (reveal-safe-cells cell-index)
+(defn player-power-up? [game-state]
+  (p/power-up? (player game-state) (:exp-progression game-state)))
 
-            (>= (:power player) (:power cell))
-            (update-in [:player :exp] + (:power cell))
+(defn inc-player-power [game-state]
+  (update game-state :player p/inc-power))
 
-            ; Decrement player health if they hit a monster stronger than them,
-            ; but make sure the health doesn't drop below 0.
-            (< (:power player) (:power cell))
-            (update-in [:player :health] #(max 0 (- % (:power cell))))
+(defn attack-player-with-enemy [game-state cell-index]
+  (update game-state :player p/attack-enemy (cell game-state cell-index)))
 
-            (<= (:health player) 0)
-            (assoc :game-over true)))
-      game-state)))
+(defn game-over? [game-state]
+  (p/dead? (player game-state)))
+
+(defn end-game [game-state]
+  (assoc game-state :game-over true))
