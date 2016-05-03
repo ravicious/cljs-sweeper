@@ -1,5 +1,5 @@
 (ns cljs-sweeper.cell-ui-state
-  (:require [cljs-sweeper.utils :as utils]))
+  (:require [cljs-sweeper.utils.coll :as coll]))
 
 (defn init [cell]
   {:displayed-property (if (zero? (:power cell))
@@ -19,7 +19,7 @@
   [ui-state powers direction]
   (let [available-powers (conj (filterv #(< 1 %) powers) nil)
         cycle-f (case direction
-                   :right utils/get-next
-                   :left utils/get-prev)]
+                   :right coll/get-next
+                   :left coll/get-prev)]
     (update-in ui-state [:power-mark]
                (partial cycle-f available-powers))))
