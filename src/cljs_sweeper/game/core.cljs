@@ -4,7 +4,7 @@
             [cljs-sweeper.game.player :as p]
             [cljs-sweeper.game.cell :as c]
             [cljs-sweeper.game.find-safe-indexes-to-reveal :as f]
-            [cljs-sweeper.utils :as utils]))
+            [cljs-sweeper.utils.coll :as coll]))
 
 (defn cell [game-state index]
   (get-in game-state [:board :cells index]))
@@ -58,7 +58,7 @@
     (->> full-cell-configuration
          (map (fn [[level count]] (repeat count level)))
          flatten
-         (utils/shuffle seed)
+         (coll/shuffle seed)
          (map c/init)
          (update-surrounding-power-in-cells game-variant)
          vec)))

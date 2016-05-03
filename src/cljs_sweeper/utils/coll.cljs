@@ -1,4 +1,5 @@
-(ns cljs-sweeper.utils
+(ns cljs-sweeper.utils.coll
+  (:refer-clojure :exclude [shuffle])
   (:require [cljsjs.chance]
             [goog.array :as garray]))
 
