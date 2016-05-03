@@ -19,3 +19,9 @@
   "Used as a predicate for reducers which should be always run."
   [& _]
   true)
+
+(defn acc-only
+  "Given f, returns a wrapper which takes any number of args and calls f only with the first argument."
+  [f]
+  (fn [accumulator & _]
+    (f accumulator)))
