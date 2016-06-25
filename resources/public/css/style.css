@@ -50,10 +50,19 @@ table {
 
 /* Sweeper CSS */
 
+#app {
+  width: 980px;
+  margin: 0 auto;
+}
+
+.game-board-wrapper {
+  position: relative;
+}
 
 .game-board {
   font-family: monospace;
   font-size: 14px;
+  margin: 0 auto;
 }
 
 .game-cell {
@@ -100,4 +109,22 @@ table {
 
 .game-cell--surrounding-0 {
   border: 1px inset whitesmoke;
+}
+
+.game-over {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  color: white;
+  opacity: 0.5;
+}
+
+.game-over--text {
+  font-size: 156px;
+  font-family: monospace;
+  text-transform: uppercase;
 }

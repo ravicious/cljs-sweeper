@@ -81,7 +81,16 @@
        [:li (str "Health: " (:health @game-info))]
        [:li (str "Seed: " (:seed @game-info))]])))
 
+(defn game-over []
+  (let [game-over? (subscribe [:game-over?])]
+    (fn game-over []
+      (when @game-over?
+        [:div.game-over
+         [:span.game-over--text "Game over"]]))))
+
 (defn render-game []
   [:div
-   [render-board]
+   [:div.game-board-wrapper
+    [game-over]
+    [render-board]]
    [render-player]])
