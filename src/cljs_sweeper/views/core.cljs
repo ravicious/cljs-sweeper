@@ -58,7 +58,8 @@
   ^{:key index} [:tr cells])
 
 (defn- render-table [rows]
-  [:table.game-board rows])
+  [:table.game-board
+   [:tbody rows]])
 
 (defn render-board []
   (let [columns (subscribe [:columns])
