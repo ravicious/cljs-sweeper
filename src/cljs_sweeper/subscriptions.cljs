@@ -34,3 +34,10 @@
 (register-sub
   :number-of-cells
   number-of-cells)
+
+(defn- game-over? [db, _]
+  (reaction (game/game-over? (:game @db))))
+
+(register-sub
+  :game-over?
+  game-over?)
